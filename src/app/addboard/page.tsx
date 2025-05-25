@@ -6,24 +6,20 @@ import FormField from '@/components/ui/form/FormField';
 import ImageFileBox from '@/components/ui/form/ImageFileBox';
 import { TextAreaField } from '@/components/ui/form/InputBox';
 import Title from '@/components/ui/Title';
-import { ArticleCreateRequest, usePostArticles } from '@/hooks/useArticles';
+import { usePostArticles } from '@/hooks/useArticles';
 import { useConfirmModal } from '@/hooks/useModal';
-import { validationRules } from '@/utils/validate';
+import { ArticlesFormSchema} from '@/utils/validate';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 
-
-const INITIAL_Article: ArticleCreateRequest = {
-  image: "",
-  content: "",
-  title: ""
-}
 type FormValues = {
   title: string;
   content: string;
-  image: string;
+  image: string[];
 };
+
 function PostArticles() {
   const router = useRouter();
   const { isConfirmOpen, confirmMessage, openConfirmModal, closeConfirmModal } = useConfirmModal();
@@ -31,39 +27,24 @@ function PostArticles() {
   const {
     register,
     handleSubmit,
-    getValues,
-    formState: { errors, isValid, isDirty },
+    control,
+    formState: { errors, isValid },
   } = useForm<FormValues>({
-    mode: 'onBlur', 
+    mode: 'onChange', 
+    defaultValues: {
+      image: [],
+      title: '',
+      content: ''
+    },
+    resolver: zodResolver(ArticlesFormSchema),
   });
 
-  const [addArticles, setAddArticles] = useState<ArticleCreateRequest>(INITIAL_Article);
 
   const { mutate: postArticles} = usePostArticles(openConfirmModal,router);
 
-  const handleFieldBlur = () => {
-    const values = getValues(); // 모든 필드 값 가져오기
-      setAddArticles((prev) => {
-        const updated = { ...prev, ...values };
-        return updated;
-      });
-    };
-  
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-      setAddArticles((prev) => ({
-    ...prev,
-    ...addArticles, // form에서 온 title, content 등
-  }));
-    postArticles(addArticles);
+    postArticles(data);
   };
-
-  function handleInputBlur(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>){
-    const value = e.target.value;
-    setAddArticles((prev) => ({
-      ...prev,
-      [e.target.id]: value
-    }));
-  }
 
   return (
     <Container className="relative mb-[130px]">
@@ -72,23 +53,34 @@ function PostArticles() {
       <form className='flex flex-col gap-6' onSubmit={handleSubmit(onSubmit)}> 
         <Button 
           type="submit"
-          variant="roundedSS" 
+          variant="primary" 
+          size="small_40"
+          width={74}
           className="!absolute top-0 right-0"
-          disabled = { !isValid || !isDirty || !addArticles.content || !addArticles.image || !addArticles.title }
+          disabled = { !isValid }
         >등록</Button>
+
         <FormField
           id="title"
           label="*제목"
           type="text"
           placeholder="제목을 입력해주세요"
           error={errors.title?.message}
-          {...register('title', {
-            ...validationRules.title,
-            onBlur: handleFieldBlur, 
-          })}
+          {...register('title')}
         />        
-        <TextAreaField id='content' label='내용' height='282px' placeholder='내용를 입력해주세요' onBlur={handleInputBlur} />
-        <ImageFileBox<ArticleCreateRequest> setForm={setAddArticles} />
+        <TextAreaField
+          id="content"
+          label='*내용' height='282px' placeholder='내용를 입력해주세요'
+          error={errors.content?.message}
+          {...register("content")}
+        />
+        <Controller
+          name="image"
+          control={control}
+          render={({ field, fieldState }) => (
+          <ImageFileBox field={field} error={fieldState.error?.message} maxCount={3}/>
+          )}
+        />
       </form>
       <ConfirmModal isOpen={isConfirmOpen} onClose={closeConfirmModal} errorMessage={confirmMessage} />
     </Container>

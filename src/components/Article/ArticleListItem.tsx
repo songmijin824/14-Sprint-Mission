@@ -1,12 +1,10 @@
 import React, { useEffect } from 'react';
-import LikeButton from '../ui/LikeButton';
 import UserInfo from '../ui/UserInfo';
 import { formatDate } from '@/utils/date';
 import { FallbackImage } from '../FallbackImage/FallbackImage';
-import { PostItem, useToggleArticlesFavorite } from '@/hooks/useArticles';
-import ConfirmModal from '../ui/ConfirmModal';
-import { useConfirmModal } from '@/hooks/useModal';
+import { PostItem } from '@/hooks/useArticles';
 import { useRouter } from 'next/navigation';
+import ArticleLikeButton from '../ui/ArticleLikeButton';
 
 interface ArticleListItemProps {
   postItem: PostItem
@@ -14,19 +12,15 @@ interface ArticleListItemProps {
 function ArticleListItem({ postItem }: ArticleListItemProps) {
   const router = useRouter();
   const href = `boards/${postItem.id}`;
+
   useEffect(() => {
     router.prefetch(href);
   }, [href, router]);
 
-  const { isConfirmOpen, confirmMessage, openConfirmModal, closeConfirmModal } = useConfirmModal();
-  // '2025-04-08T01:00:06+09:00'  '2025-04-07T01:00:06+09:00'
+  
   const createdAtString = formatDate(postItem.createdAt);
-  // console.log(createdAtString);
-    const { mutate: toggleFavorite } = useToggleArticlesFavorite(openConfirmModal, {
-    onSuccess: (data) => {
-        openConfirmModal(data.isFavorited ? "관심상품 등록되었습니다" :  "관심상품 취소되었습니다");
-      },
-    });
+
+
   return (
     <>
       <li className="border-b border-secondary-200 my-6 pb-6">
@@ -45,14 +39,11 @@ function ArticleListItem({ postItem }: ArticleListItemProps) {
           </div>
           <div className="flex justify-between w-full">
             <UserInfo ownerNickname={postItem.writer.nickname} createdAtString={createdAtString} width={24} className="gap-[8px] text-sm" childrenClassName="!flex-row items-center" fontSize='12px'/>
-            <LikeButton 
+            <ArticleLikeButton
+              className="flex gap-1 items-center text-sm "
               id={postItem.id} 
-              favoriteCount={postItem.likeCount} 
-              toggleFavorite={toggleFavorite}
-              isFavorite={false} 
               />
           </div>
-          <ConfirmModal isOpen={isConfirmOpen} onClose={closeConfirmModal} errorMessage={confirmMessage} />
         </div>
       </li>
     </>

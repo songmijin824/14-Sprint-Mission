@@ -21,7 +21,7 @@ function HomePage() {
           <h1 className="font-bold text-4xl mobile:text-3xl">
             일상의 모든 물건을&nbsp;<br className="tablet:hidden mobile:block"/>거래해 보세요
           </h1>
-          <Button link="/items" variant="roundedXL" className="mt-8" heightError={false}>구경하러 가기</Button>
+          <Button link="/items" variant="primary" size="large" width={357} className="mt-8">구경하러 가기</Button>
         </div>
       </VisualSelection>
       <MotionSelection>

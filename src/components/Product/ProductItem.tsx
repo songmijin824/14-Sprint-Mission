@@ -4,13 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 import styles from './ProductItem.module.css';
 import clsx from 'clsx';
-import { ProductSummary, useToggleProductFavorite } from '@/hooks/useItems';
+import { ProductSummary } from '@/hooks/useItems';
 import { FallbackImage } from '../FallbackImage/FallbackImage';
 import { defaultImg } from '@/lib/imageAssets';
-import { useConfirmModal, useModal } from '@/hooks/useModal';
+import { useConfirmModal } from '@/hooks/useModal';
 import ConfirmModal from '../ui/ConfirmModal';
-import { useGetUserFavorites } from '@/hooks/useUser';
-import LikeButton from '../ui/LikeButton';
+import ProductLikeButton from '../ui/ProductLikeButton';
 
 
 interface ProductItemProps {   // ProductSummary 타입정의할때 옵셔널 방식을 사용함   | undefined 필요 
@@ -24,14 +23,6 @@ function ProductItem({productItem}: ProductItemProps) {
   const productId = productItem.id ?? 0; 
 
   const { isConfirmOpen, confirmMessage, openConfirmModal, closeConfirmModal } = useConfirmModal();
-  const { data } = useGetUserFavorites({});
-
-  const { mutate: toggleFavorite } = useToggleProductFavorite(openConfirmModal, {
-  onSuccess: (data) => {
-      openConfirmModal(data.isFavorited ? "관심상품 등록되었습니다" :  "관심상품 취소되었습니다");
-    },
-  });
-  const isFavorite = data?.list.some((item) => item.id === productId) ?? false;
 
   return (
     <li className={styles.listItem}>
@@ -46,13 +37,12 @@ function ProductItem({productItem}: ProductItemProps) {
       <div className={styles.description}>
         <div className={styles.name}>{productItem.name}</div>
         <div className={styles.price}>{productItem.price?.toLocaleString()}원</div>
-        
-        <LikeButton 
+        <ProductLikeButton
           id={productId} 
-          favoriteCount={productItem.favoriteCount} 
-          toggleFavorite={toggleFavorite}
-          isFavorite={isFavorite}
-          />
+          className="flex gap-1 h-4 w-4 items-center text-sm"
+          iconWidth={16}
+          iconHeight={16}
+        />
       </div>
       <ConfirmModal isOpen={isConfirmOpen} onClose={closeConfirmModal} errorMessage={confirmMessage} />
     </li>

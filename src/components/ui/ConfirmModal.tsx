@@ -31,11 +31,13 @@ export default function ConfirmModal({ isOpen, errorMessage, onClose }: ErrorMod
   if (!modalRoot) return null;
 
   return createPortal(
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[999]">
       <div className="bg-white px-[187px] py-[68px] tablet:px-[90px] tablet:py-[52px] rounded-lg shadow-lg text-center">
         <p className="mb-[42px] font-bold">{errorMessage}</p>
         <Button
-          variant="roundedS"
+          variant="primary"
+          size="small_40"
+          width={120}
           onClick={onClose}
           onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
             if (e.key === 'Enter') {
@@ -44,7 +46,6 @@ export default function ConfirmModal({ isOpen, errorMessage, onClose }: ErrorMod
             }
           }}
           ref={confirmButtonRef}
-          className="px-[46px] py-[11px] bg-blue-500 text-white rounded hover:bg-blue-600"
         >
           확인
         </Button>

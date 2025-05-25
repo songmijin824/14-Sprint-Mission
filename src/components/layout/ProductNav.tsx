@@ -42,11 +42,11 @@ function ProductNav() {
           </div>
         </div>
         {user ? (
-          <Button onClick={handleLogout} variant="roundedS">
+          <Button onClick={handleLogout} variant="primary" size="small_48"  width={128}>
             로그아웃
           </Button>
         ) : (
-          <Button link="/login" variant="roundedS">
+          <Button link="/login" variant="primary" size="small_48"  width={128}>
             로그인
           </Button>
         )}

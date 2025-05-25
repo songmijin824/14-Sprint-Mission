@@ -89,9 +89,15 @@ function CommentItem({productId,commentItem}:CommentItemProps) {
             value={requestCommentValue} 
             onChange={({ target }: React.ChangeEvent<HTMLTextAreaElement>) => setRequestCommentValue(target.value)}  
           />
-          <div className='absolute bottom-4 right-0'>
-            <Button onClick={() => setEditMode(false)} variant="none">취소</Button>
-            <Button onClick={handleUpdate} variant="roundedSS">수정 완료</Button>
+          <div className='absolute bottom-4 right-0 flex gap-2'>
+            <Button onClick={() => setEditMode(false)} 
+              variant="outlined" 
+              size="small_40" 
+              width={74} >취소</Button>
+            <Button onClick={handleUpdate}           
+            variant="primary" 
+            size="small_40" 
+            width={106} >수정 완료</Button>
           </div>
         </div>
         ):(              

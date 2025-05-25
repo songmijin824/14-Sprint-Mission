@@ -34,6 +34,7 @@ export function useSignUp(openModal: (msg: string) => void) {
     onSuccess: (data) => {
       const { accessToken, refreshToken, user } = data;
 
+    // 자동로그인 후 메인화면으로 이동 
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(user));

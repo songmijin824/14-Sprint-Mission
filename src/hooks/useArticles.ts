@@ -37,8 +37,9 @@ export type PostDetail = {
   id: number;
   title: string;
   content: string;
-  image: string;
+  image: string[];
   likeCount: number;
+  isLiked: boolean;
   createdAt: string; // ISO 날짜 문자열
   updatedAt: string; // ISO 날짜 문자열
   writer: {
@@ -57,7 +58,7 @@ interface ProductFavoriteResponse {
 export interface ArticleCreateRequest {
   title?: string; 
   content?: string;
-  image?:string;
+  image?:string[];
 }
 
 //게시물 리스트 불러오기 
@@ -109,6 +110,59 @@ export function useInfiniteArticles(query: Omit<PostListQuery, 'page'>) {
   };
 }
 
+export const toggleLike = async ({
+  postId,
+  userAction,
+}: {
+  postId: number;
+  userAction: 'LIKE_POST' | 'UNLIKE_POST';
+}) => {
+  if (userAction === 'LIKE_POST') {
+    return await requestor.post(`/articles/${postId}/like`);
+  } else {
+    return await requestor.delete(`/articles/${postId}/like`);
+  }
+};
+
+export const useArticleLikePostMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: toggleLike, // postId만으로 작동하는 요청 함수
+
+    onMutate: async ({ userAction }) => {
+      await queryClient.cancelQueries({ queryKey: ['articleDetails'] });
+
+      const previousData = queryClient.getQueryData(['articleDetails']);
+
+      queryClient.setQueryData(['articleDetails'], (prev: any) => {
+        if (!prev) return prev;
+
+        const isLiked = userAction === 'LIKE_POST';
+        const newCount = isLiked
+          ? prev.likeCount + 1
+          : Math.max(prev.likeCount - 1, 0);
+
+        return {
+          ...prev,
+          isLiked: isLiked,
+          likeCount: newCount,
+        };
+      });
+
+      return { previousData };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(['articleDetails'], context.previousData);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['articleDetails'] });
+    }
+  });
+};
+
 // 게시물 상세보기
 export const useArticleDetails = (articleId:number) => { 
   return useQuery({
@@ -118,51 +172,6 @@ export const useArticleDetails = (articleId:number) => {
       return res.data;
     },
     placeholderData: keepPreviousData,
-  });
-};
-
-
-// 게시물 좋아요 토글
-export const useToggleArticlesFavorite = 
-(openModal: (msg: string) => void, options?: { onSuccess?: (data: any) => void }) => {
-
-  return useMutation({
-    mutationFn: async ({ id, isFavorited, setIsFavorited, setCount }:ProductFavoriteResponse ) => {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        openModal('로그인이 필요합니다.');
-        return Promise.reject('No accessToken');
-      }
-
-      setIsFavorited(!isFavorited);
-      setCount((prev: number) => isFavorited ? prev - 1 : prev + 1);
-
-      if (isFavorited) {
-        return requestor.delete(`/articles/${id}/like`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      } else {
-        return requestor.post(
-          `/articles/${id}/like`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
-    },
-    onError: (error) => {
-      const message = (error as any)?.response?.data?.message;
-      if (message?.includes('jwt malformed')) {
-        openModal('로그인 후 등록 가능합니다!');
-      } else {
-        openModal(message || '관심 게시물 처리 실패');
-      }
-    },
   });
 };
 

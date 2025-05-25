@@ -12,51 +12,82 @@ import ImageFileBox from '@/components/ui/form/ImageFileBox';
 import { useConfirmModal } from '@/hooks/useModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useRouter } from 'next/navigation';
-
-const INITIAL_PRODUCT: CreateProductRequest = {
-  images: [],
-  name: '',
-  description: '',
-  price: 0,
-  tags: [],
-};
+import { Controller, useForm } from 'react-hook-form';
+import FormField from '@/components/ui/form/FormField';
+import { itemFormSchema } from '@/utils/validate';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 
 function Additem() {
   const router = useRouter();
   const { isConfirmOpen, confirmMessage, openConfirmModal, closeConfirmModal } = useConfirmModal();
-  const [addProduct, setAddProduct] = useState(INITIAL_PRODUCT);
 
   const { mutate: postProduct} = usePostProduct(openConfirmModal,router);
 
-  function handleInputBlur(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>){
-    const value = e.target.value;
-    setAddProduct((prev) => ({
-      ...prev,
-      [e.target.id]: value
-    }));
-  }
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors, isValid },
+  } = useForm<CreateProductRequest>({
+    mode: 'onChange', 
+    defaultValues: {
+      images: [],
+      tags: [],
+      price: 0,
+      description: '',
+      name: ''
+    },
+    resolver: zodResolver(itemFormSchema),
+  });
 
-  const handleCreateProduct = () => {
-    postProduct(addProduct);
-  }
+
+  const onSubmit = (data: CreateProductRequest) => {
+    postProduct(data);
+  };
 
   return (
-    <Container>
+    <Container className="relative">
       <Title titleTag='h1' text='상품 등록하기'>
-        <Button 
-          onClick={handleCreateProduct}
-          variant="roundedSS" 
-          disabled = { !addProduct.name || !addProduct.description || !addProduct.price }
-        >등록</Button>
       </Title>
     
-      <form className={styles.formBox}> 
-        <ImageFileBox<CreateProductRequest> setForm={setAddProduct} />
-        <InputField id='name' label='상품명' inputBoxType='text' placeholder='상품명을 입력해주세요' onBlur={handleInputBlur} />
-        <TextAreaField id='description' label='상품 소개' height='282px' placeholder='상품 소개를 입력해주세요' onBlur={handleInputBlur} />
-        <InputField id='price' label='판매가격' inputBoxType='number' placeholder='판매 가격을 입력해주세요' onBlur={handleInputBlur} />
-        <TagBox product={addProduct} setProduct={setAddProduct}/>
+      <form className={styles.formBox} onSubmit={handleSubmit(onSubmit)}> 
+        <Button 
+          type="submit"
+          variant="primary" size="small_40" width={74}
+          className="!absolute top-0 right-0"
+          disabled = { !isValid }
+        >등록</Button>
+        <Controller
+          name="images"
+          control={control}
+          render={({ field, fieldState }) => (
+          <ImageFileBox field={field} error={fieldState.error?.message} maxCount={1}/>
+          )}
+        />
+        <FormField
+          id="name"
+          label="*상품명"
+          type="text"
+          placeholder="상품명을 입력해주세요"
+          error={errors.name?.message}
+          {...register('name')}
+        />   
+        <TextAreaField
+          id="description"
+          label='*상품 소개' height='282px' placeholder='상품 소개를 입력해주세요'
+          error={errors.description?.message}
+          {...register("description")}
+        />
+        <FormField
+          id="price"
+          label="*판매가격"
+          type="number"
+          placeholder="판매 가격을 입력해주세요"
+          error={errors.price?.message}
+          {...register('price')}
+        />   
+        <TagBox  control={control} name="tags" maxCount={20} />
       </form>
       <ConfirmModal isOpen={isConfirmOpen} onClose={closeConfirmModal} errorMessage={confirmMessage} />
     </Container>

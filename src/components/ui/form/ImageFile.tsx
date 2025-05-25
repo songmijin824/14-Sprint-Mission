@@ -12,11 +12,10 @@ interface ImagePreviewsProps {
 
 function ImagePreviews({ num, onClickDelete, src }: ImagePreviewsProps) {
   const handleClick = () => onClickDelete(num);
-  console.log('src', src , typeof src);
   return (
     <>
       <div className="relative w-full aspect-[1/1]">
-        <div className={styles.previewDeleteBtn} onClick={handleClick}><Icon iconName='X'  width="12" height="12"  alt='delete product image'/></div>
+        <div className={styles.previewDeleteBtn} onClick={handleClick}><Icon iconName='X'  width={12} height={12}  alt='delete product image'/></div>
         <FallbackImage src={src} fill alt={`preview image_${num}`}/>
       </div>
     </>
@@ -26,13 +25,14 @@ function ImagePreviews({ num, onClickDelete, src }: ImagePreviewsProps) {
 interface ImageFile { 
   label: string; 
   text: string; 
-  images:(string | null)[]; 
-  errorCase: string; 
+  images:(string|null)[]; 
+  errorCase?: string; 
   onChange: React.ChangeEventHandler;
   onClickDelete: (num: number) => void; 
   [key: string]: any 
 }
 function ImageFile({label, text, images, errorCase, onChange, onClickDelete, ...rest }:ImageFile) {
+  console.log(errorCase);
   
   return (
     <div className={styles.imageFile} {...rest}>
@@ -44,15 +44,14 @@ function ImageFile({label, text, images, errorCase, onChange, onClickDelete, ...
           <div className={styles.inputBtn}>
             <input type='file' onChange={onChange} />
             <div className={styles.fakeBox}>
-              <Icon iconName='plus'  width="48" height="48"  alt='add product image'/>
+              <Icon iconName='plus' width={48} height={48}  alt='add product image'/>
               <span>{text}</span>
             </div>
           </div>
           <ul className={styles.previewImg}>
-            {( images.map((img ,index) => (
-              img === null ? null :
+            {( (images || []).map((img ,index) => (
               <li key={index}>
-                <ImagePreviews num={index} onClickDelete={onClickDelete}  src={img}/>
+                <ImagePreviews num={index} onClickDelete={onClickDelete}  src={img ?? ''}/>
               </li>
             )))}
           </ul>

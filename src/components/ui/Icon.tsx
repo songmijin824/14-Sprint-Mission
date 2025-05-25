@@ -27,7 +27,7 @@ const ic_kebab = '/assets/ic_kebab.svg';
 
 const medal = '/assets/ic_medal.svg';
 
-const ICON = {
+export const ICON = {
   eyeOpen,
   eyeClose,
   heartOpen,
@@ -53,10 +53,12 @@ const ICON = {
 interface IconProps {
   iconName: keyof typeof ICON;
   alt: string;
+  width?: number;
+  height?: number;
   [key: string]: any;
 }
 
-function Icon({ iconName, alt, width="24", height="24", ...rest }: IconProps) {
+function Icon({ iconName, alt, width=24, height=24, ...rest }: IconProps) {
   return (
     <Image src={ICON[iconName]} width={width} height={height} alt={alt} {...rest} />
   );

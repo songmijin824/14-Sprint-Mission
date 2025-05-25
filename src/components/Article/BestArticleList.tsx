@@ -1,5 +1,5 @@
 'use client';
-import { BEST_POST_ITEMS, BEST_VISIBLE_ITEMS } from "@/constants/product.constants";
+import { BEST_POST_ITEMS } from "@/constants/product.constants";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { useEffect, useState } from "react";
 import Container from "../layout/Container";

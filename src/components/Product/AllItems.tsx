@@ -85,7 +85,9 @@ export function AllItems() {
           <SearchBox onSearch={(keyword) => handleKeywordChange(keyword)} />
           <Button
             className="absolute right-0 top-0"
-            variant="roundedSS"
+            variant="primary" 
+            size="small_40" 
+            width={133} 
             onClick={handleApplyClick}
           >
             상품 등록하기

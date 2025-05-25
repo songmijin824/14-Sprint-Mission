@@ -39,7 +39,7 @@ function DropdownMenu({ dropdownActions, className }: DropdownMenuProps) {
   return (
     <div className={clsx( className)} ref={dropdownRef}>
       <div className="absolute top-0 right-0 cursor-pointer" onClick={() => setIsOpen((prev) => !prev)}>
-        <Icon iconName="ic_kebab" width="24" height="24" alt="드롭다운 버튼" />
+        <Icon iconName="ic_kebab" width={24} height={24} alt="드롭다운 버튼" />
       </div>
       {isOpen && (
         <div  className={clsx(`${isOpen ? 'scale-y-100' : 'scale-y-0'} transition-transform origin-top absolute top-8 right-0 py-2 z-40 w-32 rounded-lg border border-Cool-Gray-200)] bg-white text-secondary-500 flex flex-col mobile:w-[100px]`)}>

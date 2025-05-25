@@ -36,7 +36,12 @@ function CommentForm({productId}: CommentFormProps) {
         onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setRequestCommentValue(e.target.value)}
         />
       <div className='flex justify-end'>
-        <Button variant="roundedSS" disabled={!requestCommentValue}  onClick={handleClick} >등록</Button>
+        <Button           
+          variant="primary" 
+          size="small_40" 
+          width={74} 
+           disabled={!requestCommentValue}  onClick={handleClick} >
+            등록</Button>
       </div>
       <ConfirmModal isOpen={isConfirmOpen} onClose={closeConfirmModal} errorMessage={confirmMessage} />
     </div>

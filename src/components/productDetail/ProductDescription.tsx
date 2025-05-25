@@ -3,7 +3,6 @@ import styles from './ProductDescription.module.css';
 import UserInfo from 'components/ui/UserInfo';
 import { formatDate } from 'utils/date';
 import clsx from 'clsx';
-import LikeButton from '../ui/LikeButton';
 import { useGetUserFavorites } from '@/hooks/useUser';
 import { ProductDetail, useToggleProductFavorite } from '@/hooks/useItems';
 import { useConfirmModal } from '@/hooks/useModal';
@@ -62,12 +61,20 @@ function ProductDescription(detailData:ProductDetail) {
       <div className={styles.UserInfo}>
         <UserInfo ownerNickname={ownerNickname} createdAtString={createdAtString} className="text-sm"/>
         <div className={styles.likeBtnBox}>
-           <LikeButton variant="btn-heart_L" 
-            productId={detailData.id} 
+           {/* <LikeButton 
+            className="flex gap-2 border border-secondary-200 rounded-full py-1 px-3"
+            id={detailData.id} 
             favoriteCount={detailData.favoriteCount} 
             isFavorite={isFavorite} 
-            toggleFavorite={toggleFavorite}
-            childrenClassName='gap-2' width="24" height="24"/>
+            toggleFavorite={() =>
+              toggleFavorite({
+                id: detailData.id,
+                isFavorited: isFavorite,
+                setIsFavorited: () => {},
+                setCount: () => {},
+              })
+            }
+             iconWidth={24} iconHeight={24}/> */}
         </div>
       </div>
       <ConfirmModal isOpen={isConfirmOpen} onClose={closeConfirmModal} errorMessage={confirmMessage} />

@@ -25,7 +25,21 @@ requestor.interceptors.response.use(
 
         localStorage.setItem('accessToken', accessToken);
         if (user) {
-          localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('user', JSON.stringify(user));
+        } else {
+          //user 확인안되면 토큰기반으로 재로그인
+          requestor.get('/users/me', {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          })
+          .then(() => {
+            localStorage.setItem('user', JSON.stringify(user));
+            })
+          .catch((err) => {
+            console.error('accessToken으로 유저 불러오기 실패:', err);
+            localStorage.removeItem('accessToken');
+          });
         }
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return requestor(originalRequest);

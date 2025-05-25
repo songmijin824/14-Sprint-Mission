@@ -1,6 +1,6 @@
 
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useState } from 'react';
 import styles from '../login/Login.module.css';
@@ -12,7 +12,9 @@ import { useSignUp } from '@/hooks/useAuth';
 import { useConfirmModal } from '@/hooks/useModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { validationRules } from '@/utils/validate';
+import { joinFormSchema } from '@/utils/validate';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 
 type FormValues = {
   email: string;
@@ -24,20 +26,28 @@ type FormValues = {
 function Login() {
   const [passwordBoxType, setPasswordBoxType] = useState(false);
   const [pwdCheckBoxType, setPwdCheckBoxType] = useState(false);
+
+   const router = useRouter();
  
+   useEffect(() => {
+     const accessToken = localStorage.getItem('accessToken');
+ 
+     if (accessToken) {
+       router.replace('/'); 
+     }
+   }, []);
+
   const { isConfirmOpen, confirmMessage, openConfirmModal, closeConfirmModal } = useConfirmModal();
-  const { mutate: signUp, isPending } = useSignUp(openConfirmModal);
+  const { mutate: signUp } = useSignUp(openConfirmModal);
   
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors, isValid, isDirty },
   } = useForm<FormValues>({
     mode: 'onBlur', // blur 시 유효성 검사
+    resolver: zodResolver(joinFormSchema),
   });
-
-  const password = watch('password');
   
   const onSubmit: SubmitHandler<FormValues> = (data) => {
     signUp(data);
@@ -59,7 +69,7 @@ function Login() {
               type="email"
               placeholder="이메일을 입력해주세요"
               error={errors.email?.message}
-              {...register('email', validationRules.email)}
+              {...register('email')}
             />
 
             <FormField
@@ -68,7 +78,7 @@ function Login() {
               type="text"
               placeholder="닉네임을 입력해주세요"
               error={errors.nickname?.message}
-              {...register('nickname', validationRules.nickname)}
+              {...register('nickname')}
             />
 
             <FormField
@@ -80,7 +90,7 @@ function Login() {
               withEyeToggle
               eyeState={passwordBoxType} // eye 토글 상태 관리 필요시 별도 상태 선언
               onEyeToggle={handleEyeClick}
-              {...register('password', validationRules.password)}
+              {...register('password')}
             />
             <FormField
               id="login_pwd_check"
@@ -91,13 +101,13 @@ function Login() {
               withEyeToggle
               eyeState={pwdCheckBoxType} // eye 토글 상태 관리 필요시 별도 상태 선언
               onEyeToggle={handleEyePwdCheck}
-              {...register('passwordConfirmation', validationRules.passwordConfirmation(password))}
+              {...register('passwordConfirmation')}
             />
                         
             <Button 
               type="submit"
-              variant='roundedXL' 
-              className="w-full"
+              variant='primary' 
+              size="large"
               disabled={!isValid || !isDirty}
             >
               회원가입

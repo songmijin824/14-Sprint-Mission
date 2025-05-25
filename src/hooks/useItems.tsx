@@ -1,5 +1,6 @@
 import { requestor } from "@/lib/requestor";
 import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useEffect, useRef, useState } from "react";
 
@@ -19,6 +20,7 @@ export interface ProductSummary {
   ownerId?: number;
   ownerNickname?: string;
   favoriteCount?: number;
+  isFavorite?: boolean;
   createdAt?: string; // ISO 문자열, 필요시 Date로 변환 가능
 }
 
@@ -29,13 +31,12 @@ export interface ProductListResponse {
 
 // 상품 등록 요청 타입
 export interface CreateProductRequest {
+  name: string;
   images: string[];
-  tags: string[];
   price: number;
   description: string;
-  name: string;
+  tags?: string[];
 }
-
 // 상품 응답 타입
 export interface CreateProductResponse {
   createdAt: string;
@@ -70,6 +71,7 @@ export interface ProductDetail {
   ownerId: number;
   ownerNickname: string;
 }
+
 // 상품 리스트 불러오기
 export const useItemList = (query:ProductQuery) => { 
   return useQuery({
@@ -95,7 +97,7 @@ export function usePostProduct(openModal: (msg: string) => void, router: AppRout
     onSuccess: (data) => {
       openModal('상품 등록이 완료되었습니다!');
        setTimeout(() => {
-         router.push(`/items${data.id}`);
+         router.push(`/items/${data.id}`);
         }, 1300);
     },
     onError: (error: any) => {
@@ -104,49 +106,63 @@ export function usePostProduct(openModal: (msg: string) => void, router: AppRout
   });
 };
 
-// 상품 좋아요 토글
-export const useToggleProductFavorite = 
-(openModal: (msg: string) => void, options?: { onSuccess?: (data: any) => void }) => {
+
+// 상품 리스트 불러오기
+
+export const toggleLike = async ({
+  postId,
+  userAction,
+}: {
+  postId: number;
+  userAction: 'LIKE_POST' | 'UNLIKE_POST';
+}) => {
+  if (userAction === 'LIKE_POST') {
+    return await requestor.post(`/products/${postId}/favorite`);
+  } else {
+    return await requestor.delete(`/products/${postId}/favorite`);
+  }
+};
+
+export const useProductLikePostMutation = () => {
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, isFavorited, setIsFavorited, setCount }:ProductFavoriteResponse ) => {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        openModal('로그인이 필요합니다.');
-        return Promise.reject('No accessToken');
-      }
+    mutationFn: toggleLike, // postId만으로 작동하는 요청 함수
 
-      setIsFavorited(!isFavorited);
-      setCount((prev: number) => isFavorited ? prev - 1 : prev + 1);
+    onMutate: async ({ userAction }) => {
+      await queryClient.cancelQueries({ queryKey: ['ItemsDetails'] });
 
-      if (isFavorited) {
-        return requestor.delete(`/products/${id}/favorite`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      } else {
-        return requestor.post(
-          `/products/${id}/favorite`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+      const previousData = queryClient.getQueryData(['ItemsDetails']);
+
+      queryClient.setQueryData(['ItemsDetails'], (prev: any) => {
+        if (!prev) return prev;
+
+        const isLiked = userAction === 'LIKE_POST';
+        const newCount = isLiked
+          ? prev.favoriteCount + 1
+          : Math.max(prev.favoriteCount - 1, 0);
+
+        return {
+          ...prev,
+          isFavorite: isLiked,
+          favoriteCount: newCount,
+        };
+      });
+
+      return { previousData };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(['ItemsDetails'], context.previousData);
       }
     },
-    onError: (error) => {
-      const message = (error as any)?.response?.data?.message;
-      if (message?.includes('jwt malformed')) {
-        openModal('로그인 후 등록 가능합니다!');
-      } else {
-        openModal(message || '관심상품 처리 실패');
-      }
-    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['ItemsDetails'] });
+    }
   });
 };
+
+
 // 상품 상세보기 
 export const useProductsDetails = (productId:number) => { 
   return useQuery({

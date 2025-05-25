@@ -6,38 +6,36 @@ import styles from './Button.module.css';
 import clsx from 'clsx';
 
 interface ButtonProps {
-  link?: string; // Made optional
   variant: string;
-  children: React.ReactNode;
+  size: string;
+  width?: number;
+  children?: React.ReactNode;
   className?: string;
-  heightError?: any;
-  disabled?: boolean;
-  onClick?: () => void; 
   childrenClassName?: string;
   [key: string]: any; 
 }
-function Button({ variant, className, childrenClassName, link, children,heightError,disabled, ...restProps } : ButtonProps) {
-  let combinedClassName = clsx(styles.btn, styles[variant], className);
+function Button({ variant, className, size, width, childrenClassName, link, children, ...restProps } : ButtonProps) {
+  const combinedClassName = clsx( styles.btn,  styles[variant] , styles[size] , className);
+  const inlineStyle = width ? { width: `${width}px`, minWidth: `${width}px` } : { width:'100%' };
 
-  if(heightError) combinedClassName = clsx(styles.btn, styles._2, styles[variant], className, 'flex gap-2');
-  
   if (link) {
     return (
       <Link
-        {...restProps}
         href={link}
         className={combinedClassName}
+        style={inlineStyle}
+        {...restProps}
         >
           <span className={clsx(styles.top,childrenClassName)}>{children}</span>
           <span className={clsx(styles.front,childrenClassName)}>{children}</span>
       </Link>
     );
   }
-  return (
+  return (            
     <button
-      {...restProps}
       className={combinedClassName}
-      disabled={disabled}
+      style={inlineStyle}
+      {...restProps}
       >
       <span className={clsx(styles.top,childrenClassName)}>{children}</span>
       <span className={clsx(styles.front,childrenClassName)}>{children}</span>

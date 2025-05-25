@@ -3,7 +3,7 @@ import { requestor } from '@/lib/requestor'; // axios 인스턴스
 
 
 
-export const useUploadImage = (openModal: (msg: string) => void ,onSuccessCallback: (url: string) => void) => {
+export const useUploadImage = () => {
   return useMutation({
     mutationFn: async ( file:File ) => {
       const formData = new FormData();
@@ -14,16 +14,6 @@ export const useUploadImage = (openModal: (msg: string) => void ,onSuccessCallba
       });
 
       return res.data.url;
-    },
-
-    onSuccess: (url) => {
-      onSuccessCallback(url);
-    },
-
-    // 💡 openModal은 mutation 호출 시 외부에서 핸들링 권장 (mutationFn에 묶는 건 anti-pattern일 수 있음)
-    onError: (error: any) => {
-      const message = error?.response?.data?.message || '이미지 업로드 실패';
-      openModal(message);
     },
   });
 };

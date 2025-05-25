@@ -34,12 +34,18 @@ const Modal: React.FC<ModalProps> = ({ isOpen, closeModal, onclick, message }) =
   return createPortal(
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white rounded-xl p-6 shadow-xl relative  border border-cool-gray-200">
-        <Icon iconName="check"  width="12" height="12"  className="bg-[var(--primary_100)] mx-auto mb-6" alt="check icon" />
+        <Icon iconName="check"  width={12} height={12}  className="bg-[var(--primary_100)] mx-auto mb-6" alt="check icon" />
         <p className="mb-8 text-center">{message}</p>
         <div className="flex justify-center gap-2">
-          <Button variant="lined_btn" onClick={() => closeModal()}>아니요</Button>
-          <Button
-            variant="roundedS"
+          <Button           
+          variant="outlined" 
+          size="small_40" 
+          width={100} 
+          onClick={() => closeModal()}>아니요</Button>
+          <Button   
+          variant="primary" 
+          size="small_40" 
+          width={100} 
             onClick={() => onclick()}
             onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
               if (e.key === 'Enter') {

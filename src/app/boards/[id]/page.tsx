@@ -41,10 +41,9 @@ function PostDetail() {
                   <LikeButton 
                     id={data.id} 
                     favoriteCount={data.likeCount} 
-                    toggleFavorite={toggleFavorite}
                     isFavorite={false} 
-                    className="border rounded-full border-secondary-200 py-[7px] px-[12px]"
-                    childrenClassName='gap-0 text-[16px]' width="24" height="24"/>
+                    className="border flex gap-2 rounded-full border-secondary-200 py-[7px] px-[12px]"
+                    iconWidth={24} iconHeight={24}/>
                 </div>
               </div>
               <div>

@@ -62,7 +62,7 @@ export function ArticleList() {
         <Title titleTag='h2' text='게시글'> 
           <Button
             className="absolute right-0 top-0"
-            variant="roundedSS"
+            variant="primary" size="small_40" width={88}
             onClick={handleApplyClick}
           >
             글쓰기
@@ -95,9 +95,13 @@ export function ArticleList() {
               {isFetchingNextPage && <LoadingBox className="h-[572px]" />}
               {hasNextPage && (
                 <div className="text-center">
-                  <button onClick={handleLoadMore} disabled={isFetchingNextPage} className="mt-4 bg-blue-500 text-white px-10 py-3 rounded">
+                  <Button 
+                    onClick={handleLoadMore} 
+                    disabled={isFetchingNextPage} 
+                    variant="outlined" size="medium" width={357} 
+                    >
                     게시물 더보기
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

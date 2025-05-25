@@ -1,6 +1,6 @@
 
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import Link from 'next/link';
 import styles from './Login.module.css';
@@ -12,7 +12,9 @@ import { useConfirmModal } from '@/hooks/useModal';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import FormField from '@/components/ui/form/FormField';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import { validationRules } from '@/utils/validate';
+import { loginFormSchema } from '@/utils/validate';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 
 type FormValues = {
   email: string;
@@ -20,10 +22,19 @@ type FormValues = {
 };
 
 function Login() {
+  const router = useRouter();
   const [passwordBoxType, setPasswordBoxType] = useState(false);
 
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken');
+
+    if (accessToken) {
+      router.replace('/'); 
+    }
+  }, []);
+
   const { isConfirmOpen, confirmMessage, openConfirmModal, closeConfirmModal } = useConfirmModal();
-  const { mutate: login, isPending } = useLoginMutation(openConfirmModal);
+  const { mutate: login } = useLoginMutation(openConfirmModal);
   
   const {
     register,
@@ -31,6 +42,7 @@ function Login() {
     formState: { errors, isValid, isDirty },
   } = useForm<FormValues>({
     mode: 'onBlur', // blur 시 유효성 검사
+    resolver: zodResolver(loginFormSchema),
   });
 
   const onSubmit: SubmitHandler<FormValues> = (data) => {
@@ -52,7 +64,7 @@ function Login() {
             type="email"
             placeholder="이메일을 입력해주세요"
             error={errors.email?.message}
-            {...register('email', validationRules.email)}
+            {...register('email')}
           />
           
           <FormField
@@ -64,10 +76,15 @@ function Login() {
             withEyeToggle
             eyeState={passwordBoxType} // eye 토글 상태 관리 필요시 별도 상태 선언
             onEyeToggle={handleEyeClick}
-            {...register('password', validationRules.password)}
+            {...register('password')}
           />
 
-          <Button type="submit" variant='roundedXL' className="w-full"  disabled={!isValid || !isDirty}>로그인</Button>
+          <Button 
+            type="submit" 
+            variant='primary' 
+            size="large"  
+            disabled={!isValid || !isDirty}
+            >로그인</Button>
         </form>
         </div>
         <SnsLogin />
